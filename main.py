@@ -122,6 +122,9 @@ class OpGgAramScraper:
         return GameItem(name=name, image_url=src, count=count)
 
     def _extract_table_by_header(self, soup: BeautifulSoup, header_text: str) -> List[BuildRow]:
+        isSummonerSpells = False
+        if header_text == "Summoner Spells":
+            isSummonerSpells = True
         data = []
         # Case insensitive search for header
         header = soup.find(lambda tag: tag.name == "th" and header_text.lower() in tag.get_text().lower())
@@ -130,29 +133,34 @@ class OpGgAramScraper:
             return []
 
         table = header.find_parent("table")
+
+        if isSummonerSpells:
+            table = table.parent
+
         if not table: return []
-        tbody = table.find("tbody")
-        if not tbody: return []
-            
-        rows = tbody.find_all("tr")
+        tbodies = table.find_all("tbody")
+        for tbody in tbodies:
+            if not tbody: return []
+                
+            rows = tbody.find_all("tr")
 
-        for row in rows:
-            cols = row.find_all("td")
-            if not cols or len(cols) < 3:
-                continue
+            for row in rows:
+                cols = row.find_all("td")
+                if not cols or len(cols) < 3:
+                    continue
 
-            item_container = cols[0]
-            images = item_container.find_all("img")
-            items_list = [self._extract_item_details(img) for img in images if img.get('src')]
+                item_container = cols[0]
+                images = item_container.find_all("img")
+                items_list = [self._extract_item_details(img) for img in images if img.get('src')]
 
-            stats_div = cols[1]
-            pick_rate = stats_div.find("strong").get_text(strip=True) if stats_div.find("strong") else "N/A"
-            games = stats_div.find("span").get_text(strip=True) if stats_div.find("span") else "N/A"
+                stats_div = cols[1]
+                pick_rate = stats_div.find("strong").get_text(strip=True) if stats_div.find("strong") else "N/A"
+                games = stats_div.find("span").get_text(strip=True) if stats_div.find("span") else "N/A"
 
-            win_rate_div = cols[2]
-            win_rate = win_rate_div.find("strong").get_text(strip=True) if win_rate_div.find("strong") else "N/A"
+                win_rate_div = cols[2]
+                win_rate = win_rate_div.find("strong").get_text(strip=True) if win_rate_div.find("strong") else "N/A"
 
-            data.append(BuildRow(items=items_list, win_rate=win_rate, pick_rate=pick_rate, games=games))
+                data.append(BuildRow(items=items_list, win_rate=win_rate, pick_rate=pick_rate, games=games))
         
         # sort 
         data.sort(key=lambda x: x.win_rate, reverse=True)
