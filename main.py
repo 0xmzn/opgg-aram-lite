@@ -153,6 +153,9 @@ class OpGgAramScraper:
             win_rate = win_rate_div.find("strong").get_text(strip=True) if win_rate_div.find("strong") else "N/A"
 
             data.append(BuildRow(items=items_list, win_rate=win_rate, pick_rate=pick_rate, games=games))
+        
+        # sort 
+        data.sort(key=lambda x: x.win_rate, reverse=True)
 
         return data
 
@@ -161,7 +164,7 @@ class OpGgAramScraper:
             "Core Builds": self._extract_table_by_header(soup, "Core Builds"),
             "Starter Items": self._extract_table_by_header(soup, "Starter Items"),
             "Boots": self._extract_table_by_header(soup, "Boots"),
-            "Skills": self._extract_table_by_header(soup, "Skill"),
+            "Summoner Spells": self._extract_table_by_header(soup, "Summoner Spells")
         }
         
         # Pre-fetch images
@@ -193,8 +196,8 @@ class ScrollableFrame(ttk.Frame):
 class AramBuildApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("OP.GG ARAM Visualizer")
-        self.root.geometry("1100x800")
+        self.root.title("OP.GG ARAM Lite")
+        self.root.geometry("650x400")
         
         self.scraper = OpGgAramScraper()
         self.photo_refs = [] 
@@ -204,7 +207,6 @@ class AramBuildApp:
 
     def _setup_styles(self):
         style = ttk.Style()
-        style.theme_use('clam')
         style.configure("Bold.TLabel", font=('Segoe UI', 10, 'bold'))
         style.configure("Header.TLabel", font=('Segoe UI', 11, 'bold'), background="#d1d5db")
 
@@ -215,11 +217,11 @@ class AramBuildApp:
 
         ttk.Label(control_frame, text="Champion Name:", style="Bold.TLabel").pack(side=tk.LEFT, padx=(0, 5))
         
-        self.champ_var = tk.StringVar(value="Vel'Koz")
+        self.champ_var = tk.StringVar()
         self.champ_entry = ttk.Entry(control_frame, textvariable=self.champ_var, width=25, font=('Segoe UI', 10))
         self.champ_entry.pack(side=tk.LEFT, padx=5)
         # Bind Enter key to trigger search
-        self.champ_entry.bind("<Return>", lambda event: self.on_fetch_click())
+        self.champ_entry.bind("<Return>", lambda e: self.on_fetch_click())
 
         self.fetch_btn = ttk.Button(control_frame, text="Search", command=self.on_fetch_click)
         self.fetch_btn.pack(side=tk.LEFT, padx=5)
@@ -232,7 +234,7 @@ class AramBuildApp:
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         self.tabs = {}
-        for category in ["Core Builds", "Starter Items", "Boots", "Skills"]:
+        for category in ["Starter Items", "Core Builds", "Boots", "Summoner Spells"]:
             frame = ScrollableFrame(self.notebook)
             self.notebook.add(frame, text=category)
             self.tabs[category] = frame.scrollable_frame
