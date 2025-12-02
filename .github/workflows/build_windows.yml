@@ -37,7 +37,7 @@ jobs:
     # --clean: Clear pyinstaller cache
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --clean --name AramTool main.py
+        pyinstaller --onedir --windowed --clean --name AramTool main.py
 
     # 7. Upload the result so you can download it
     - name: Upload Artifact
