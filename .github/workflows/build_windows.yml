@@ -1,5 +1,4 @@
-name: Build Windows Exe
-
+name: Build Windows
 on:
   push:
     branches: [ "master" ]
@@ -28,10 +27,10 @@ jobs:
       
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onedir --windowed --clean --name AramTool main.py
+        pyinstaller --onedir --windowed --clean --name OPGG-ARAM-Lite main.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: AramTool-Windows-Folder
-        path: dist/AramTool
+        name: OPGG-ARAM-Lite
+        path: dist/OPGG-ARAM-Lite
