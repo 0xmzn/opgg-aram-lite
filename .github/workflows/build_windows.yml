@@ -1,6 +1,5 @@
 name: Build Windows Exe
 
-# Trigger on push to main OR manually via the "Run workflow" button
 on:
   push:
     branches: [ "master" ]
@@ -11,7 +10,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # 1. Check out your code
     - uses: actions/checkout@v4
 
     - name: Set up Python
@@ -19,29 +17,21 @@ jobs:
       with:
         python-version: '3.13'
 
-    # 3. Install UV and PyInstaller
     - name: Install build tools
       run: pip install uv pyinstaller
 
-    # 4. Use UV to generate requirements.txt from your pyproject.toml/uv.lock
     - name: Generate requirements
       run: uv export --format requirements-txt > requirements.txt
 
-    # 5. Install dependencies into the system python
     - name: Install dependencies
       run: pip install -r requirements.txt
-
-    # 6. Build the Exe
-    # --onefile: Single .exe file
-    # --windowed: No black console window pops up
-    # --clean: Clear pyinstaller cache
+      
     - name: Build with PyInstaller
       run: |
         pyinstaller --onedir --windowed --clean --name AramTool main.py
 
-    # 7. Upload the result so you can download it
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: AramTool-Windows-Exe
-        path: dist/AramTool.exe
+        name: AramTool-Windows-Folder
+        path: dist/AramTool
